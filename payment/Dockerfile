@@ -10,6 +10,7 @@ WORKDIR /app
 COPY requirements.txt /app/
 
 RUN pip install -r requirements.txt
+RUN splunk-py-trace-bootstrap
 
 COPY *.py /app/
 COPY payment.ini /app/
