@@ -49,6 +49,7 @@ helm-upgrade:
 	  --set splunk.rumToken=$(splunk-rum-token) --set splunk.realm=$(splunk-realm) \
 	  robot-shop --namespace robot-shop ./K8s/helm/
 
-rollout/web:
+# rollout/targets
+$(patsubst %,rollout/%,$(targets)):
 	kubectl rollout restart deploy $(@F) --namespace robot-shop
 

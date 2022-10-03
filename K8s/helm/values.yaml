@@ -11,11 +11,11 @@ payment:
   gateway: null
   #gateway: https://www.worldpay.com
 
-## Splunk RUM configuration
+## Splunk Observability configuration
 splunk:
   realm: us1
   rumToken: null
-  
+  environment: robot-shop 
 
 # Pod Security Policy
 psp:
