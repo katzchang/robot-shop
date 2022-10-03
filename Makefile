@@ -1,6 +1,7 @@
 
 
 image-names:=rs-mongodb rs-catalogue rs-user rs-cart rs-mysql-db rs-shipping rs-ratings rs-payment rs-dispatch rs-web
+targets:=mongo catalogue user cart mysql shipping ratings payment dispatch web
 
 aws-region:=ap-northeast-1
 aws-account-id:=
@@ -48,4 +49,6 @@ helm-upgrade:
 	  --set splunk.rumToken=$(splunk-rum-token) --set splunk.realm=$(splunk-realm) \
 	  robot-shop --namespace robot-shop ./K8s/helm/
 
+rollout/web:
+	kubectl rollout restart deploy $(@F) --namespace robot-shop
 
