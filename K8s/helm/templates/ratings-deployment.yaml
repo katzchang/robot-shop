@@ -21,6 +21,23 @@ spec:
       - name: ratings
         image: {{ .Values.image.repo }}/rs-ratings:{{ .Values.image.version }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: SPLUNK_OTEL_AGENT
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://$(SPLUNK_OTEL_AGENT):4317"
+          - name: OTEL_SERVICE_NAME
+            value: "rs-ratings"
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: "deployment.environment={{ .Values.splunk.environment }}"
+          - name: SPLUNK_METRICS_ENABLED
+            value: "true"
+          - name: SPLUNK_METRICS_ENDPOINT
+            value: "http://$(SPLUNK_OTEL_AGENT):9943"
+          - name: SPLUNK_PROFILER_ENABLED
+            value: "true"
         ports:
         - containerPort: 80
         resources:
