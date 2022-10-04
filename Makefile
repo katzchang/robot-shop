@@ -52,4 +52,5 @@ helm-upgrade:
 # rollout/targets
 $(patsubst %,rollout/%,$(targets)):
 	kubectl rollout restart deploy $(@F) --namespace robot-shop
+	kubectl logs --namespace robot-shop deploy/$(@F)
 
