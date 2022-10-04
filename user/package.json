@@ -9,13 +9,20 @@
   "author": "SteveW",
   "license": "Apache-2.0",
   "dependencies": {
-      "body-parser": "^1.18.1",
-      "express": "^4.15.4",
-      "mongodb": "^3.5.3",
-      "redis": "^2.8.0",
-      "pino": "^5.10.8",
-      "express-pino-logger": "^4.0.0",
-      "pino-pretty": "^2.5.0",
-      "@instana/collector": "^1.132.2"
+    "@opentelemetry/instrumentation-express": "^0.29.0",
+    "@opentelemetry/instrumentation-http": "^0.29.2",
+    "@opentelemetry/instrumentation-mongodb": "^0.30.0",
+    "@opentelemetry/instrumentation-pino": "^0.29.0",
+    "@opentelemetry/instrumentation-redis": "^0.31.0",
+    "@splunk/otel": "^1.1.0",
+    "body-parser": "^1.18.1",
+    "express": "^4.15.4",
+    "express-pino-logger": "^4.0.0",
+    "express-prom-bundle": "^5.1.5",
+    "mongodb": "^3.5.3",
+    "pino": "^5.10.8",
+    "pino-pretty": "^2.5.0",
+    "prom-client": "^11.5.3",
+    "redis": "^2.8.0"
   }
 }

@@ -21,12 +21,12 @@ spec:
       - name: web
         image: {{ .Values.image.repo }}/rs-web:{{ .Values.image.version }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        {{- if .Values.eum.key }}
+        {{- if .Values.splunk.rumToken }}
         env:
-        - name: INSTANA_EUM_KEY
-          value: {{ .Values.eum.key }}
-        - name: INSTANA_EUM_REPORTING_URL
-          value: {{ .Values.eum.url }}
+        - name: SPLUNK_RUM_TOKEN
+          value: {{ .Values.splunk.rumToken }}
+        - name: SPLUNK_REALM
+          value: {{ .Values.splunk.realm }}
         {{- end}}
         ports:
         - containerPort: 8080

@@ -1,0 +1,9 @@
+<script src="https://cdn.signalfx.com/o11y-gdi-rum/latest/splunk-otel-web.js" crossorigin="anonymous"></script>
+<script>
+    SplunkRum.init({
+        beaconUrl: "https://rum-ingest.SPLUNK_REALM.signalfx.com/v1/rum",
+        rumAuth: "SPLUNK_RUM_TOKEN",
+        app: "robot-shop",
+        environment: "robot-shop"
+        });
+</script>
