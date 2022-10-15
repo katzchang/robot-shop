@@ -1,5 +1,18 @@
 version: '3'
+
+
 services:
+  otelcol:
+    image: quay.io/signalfx/splunk-otel-collector
+    command: [ "--config=/etc/otelcol-config.yml" ]
+    volumes:
+      - ./otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
+    env_file:
+     - ./otelcollector/.env
+    ports:
+      - "4317"
+    logging:
+      << *logging
   mongodb:
     build:
       context: mongo
