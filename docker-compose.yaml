@@ -2,17 +2,6 @@ version: '3'
 
 
 services:
-  otelcol:
-    image: quay.io/signalfx/splunk-otel-collector
-    command: [ "--config=/etc/otelcol-config.yml" ]
-    volumes:
-      - ./otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
-    env_file:
-     - ./otelcollector/.env
-    ports:
-      - "4317"
-    logging:
-      << *logging
   mongodb:
     build:
       context: mongo
@@ -24,6 +13,17 @@ services:
       options:
         max-size: "25m"
         max-file: "2"
+  otelcol:
+    image: quay.io/signalfx/splunk-otel-collector
+    command: [ "--config=/etc/otelcol-config.yml" ]
+    volumes:
+      - ./otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
+    env_file:
+      - ./otelcollector/.env
+    networks:
+      - robot-shop
+    logging:
+      <<: *logging
   redis:
     image: redis:6.2-alpine
     networks:
