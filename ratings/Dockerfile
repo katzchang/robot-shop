@@ -6,13 +6,17 @@ FROM php:7.4-apache
 RUN apt-get update && apt-get install -yqq unzip libzip-dev \
     && docker-php-ext-install pdo_mysql opcache zip
 
-# Enable AutoProfile for PHP which is currently opt-in beta
-RUN echo "instana.enable_auto_profile=1" > "/usr/local/etc/php/conf.d/zzz-instana-extras.ini"
+RUN curl -sL https://github.com/signalfx/signalfx-php-tracing/releases/latest/download/signalfx-tracing.deb -o signalfx-tracing.deb
+RUN dpkg -i signalfx-tracing.deb
 
 # relax permissions on status
 COPY status.conf /etc/apache2/mods-available/status.conf
 # Enable Apache mod_rewrite and status
 RUN a2enmod rewrite && a2enmod status
+
+
+ENV SIGNALFX_ENDPOINT_URL=http://otelcol:9080/v1/trace
+ENV SIGNALFX_SERVICE_NAME=rs-ratings
 
 WORKDIR /var/www/html
 
