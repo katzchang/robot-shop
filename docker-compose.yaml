@@ -19,7 +19,7 @@ services:
     volumes:
       - ./otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
     env_file:
-      - ./otelcollector/.env
+      - splunk.env
     networks:
       - robot-shop
     logging:
@@ -174,7 +174,7 @@ services:
       timeout: 10s
       retries: 3
     env_file:
-      - rum.env
+      - splunk.env
     logging:
       <<: *logging
 

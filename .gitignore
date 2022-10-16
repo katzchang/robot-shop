@@ -7,4 +7,4 @@ Gopkg.lock
 node_modules
 package-lock.json
 
-rum.env
+splunk.env

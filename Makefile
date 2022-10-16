@@ -58,11 +58,3 @@ start:
 stop:
 	docker compose -f docker-compose.yaml -f docker-compose-load.yaml down
 
-splunk-rum-token:=
-splunk-realm:=us1
-helm-upgrade:
-	helm upgrade \
-	  --set image.repo=$(repository-base) --set image.version=$(tag) --set image.pullPolicy=Always \
-	  --set splunk.rumToken=$(splunk-rum-token) --set splunk.realm=$(splunk-realm) \
-	  robot-shop --namespace robot-shop ./K8s/helm/
-
