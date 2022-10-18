@@ -4,3 +4,7 @@ requests
 pika
 prometheus_client
 splunk-opentelemetry[all]
+opentelemetry-instrumentation-flask
+opentelemetry-instrumentation-wsgi
+opentelemetry-instrumentation-requests
+opentelemetry-instrumentation-pika

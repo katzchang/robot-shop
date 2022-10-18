@@ -20,6 +20,7 @@ ENV OTEL_SERVICE_NAME=rs-payment
 ENV SPLUNK_METRICS_ENABLED=true
 ENV SPLUNK_METRICS_ENDPOINT=http://otelcol:9943
 ENV SPLUNK_PROFILER_ENABLED=true
+ENV OTEL_INSTRUMENTATION_HTTP_CAPTURE_HEADERS_SERVER_REQUEST="traceparent,content-type"
 
 #CMD ["python", "payment.py"]
 CMD ["uwsgi", "--ini", "payment.ini"]
