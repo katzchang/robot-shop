@@ -7,16 +7,6 @@ receivers:
       http:
   signalfx:
     endpoint: 0.0.0.0:9943
-  jaeger:
-    protocols:
-      grpc:
-        endpoint: 0.0.0.0:14250
-      thrift_binary:
-        endpoint: 0.0.0.0:6832
-      thrift_compact:
-        endpoint: 0.0.0.0:6831
-      thrift_http:
-        endpoint: 0.0.0.0:14268
   smartagent/signalfx-forwarder:
     type: signalfx-forwarder
     listenAddress: 0.0.0.0:9080
@@ -64,7 +54,7 @@ service:
 
   pipelines:
     traces:
-      receivers: [otlp, jaeger, smartagent/signalfx-forwarder]
+      receivers: [otlp, smartagent/signalfx-forwarder]
       processors: [memory_limiter, batch, resource/environment]
       exporters: [sapm, signalfx, logging]
     metrics/internal:

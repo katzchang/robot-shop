@@ -20,10 +20,6 @@ from prometheus_client import Counter, Histogram
 import uwsgidecorators
 from splunk_otel.tracing import start_tracing
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.instrumentation.pika import PikaInstrumentor
-
-
 
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
@@ -41,9 +37,8 @@ PromMetrics['AVS'] = Histogram('cart_value', 'Avergae Value Sale', buckets=(100,
 @uwsgidecorators.postfork
 def setup_tracing():
    start_tracing()
+   # Instrument the Flask app instance explicitly
    FlaskInstrumentor().instrument_app(app)
-   RequestsInstrumentor().instrument()
-   PikaInstrumentor().instrument()
 
 @app.errorhandler(Exception)
 def exception_handler(err):
