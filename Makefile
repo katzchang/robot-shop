@@ -4,7 +4,7 @@ targets:=load mongo catalogue user cart mysql shipping ratings payment dispatch 
 
 aws-region:=ap-northeast-1
 aws-account-id:=
-image-name:=
+image-name:=rs-$(target)
 tag:=latest
 repository-base:=$(aws-account-id).dkr.ecr.ap-northeast-1.amazonaws.com
 repository:=$(repository-base)/$(image-name)
