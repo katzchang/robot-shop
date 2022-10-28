@@ -1,13 +1,12 @@
-const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
-
+const api = require('@opentelemetry/api');
 const mongoClient = require('mongodb').MongoClient;
 const mongoObjectID = require('mongodb').ObjectID;
 const redis = require('redis');
 const bodyParser = require('body-parser');
 const express = require('express');
-const pino = require('pino');
-const expPino = require('express-pino-logger');
+const logger = require('pino')()
+const pinoHttp = require('pino-http')()
+const { countAllRequests } = require("./monitoring");
 
 // MongoDB
 var db;
@@ -15,34 +14,50 @@ var usersCollection;
 var ordersCollection;
 var mongoConnected = false;
 
-const logger = pino({
-    level: 'info',
-    prettyPrint: false,
-    useLevelLabels: true
-});
-const expLogger = expPino({
-    logger: logger
-
-});
-
 const app = express();
 
-app.use(expLogger);
+app.use(pinoHttp);
+
+app.use(countAllRequests());
 
 app.use((req, res, next) => {
     res.set('Timing-Allow-Origin', '*');
     res.set('Access-Control-Allow-Origin', '*');
+
+    next();
+});
+
+app.use((req, res, next) => {
+    let dcs = [
+        "asia-northeast2",
+        "asia-south1",
+        "europe-west3",
+        "us-east1",
+        "us-west1"
+    ];
+
+    const currentSpan = api.trace.getSpan(api.context.active());
+    currentSpan.setAttribute('custom.sdk.tags.datacenter', dcs[Math.floor(Math.random() * dcs.length)]);
+
     next();
 });
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/health', (req, res) => {
+app.get('/health-check', (req, res) => {
     var stat = {
         app: 'OK',
         mongo: mongoConnected
     };
+
+    const currentSpan = api.trace.getSpan(api.context.active());
+    currentSpan.setAttribute('http.request.header.x_instana_synthetic', 1);
+
+    if (!stat.mongo) {
+        return res.status(500).json(stat);
+    }
+
     res.json(stat);
 });
 
@@ -236,12 +251,16 @@ app.get('/history/:id', (req, res) => {
 
 // connect to Redis
 var redisClient = redis.createClient({
-    host: process.env.REDIS_HOST || 'redis'
+    url: process.env.REDIS_URL || 'redis://redis:6379',
+    legacyMode: true
 });
+
+redisClient.connect();
 
 redisClient.on('error', (e) => {
     logger.error('Redis ERROR', e);
 });
+
 redisClient.on('ready', (r) => {
     logger.info('Redis READY', r);
 });

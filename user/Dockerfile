@@ -10,7 +10,10 @@ COPY package.json /opt/server/
 
 RUN npm install
 
-COPY server.js /opt/server/
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
+ENV OTEL_SERVICE_NAME=rs-user
 
-CMD ["node", "-r", "@splunk/otel/instrument", "server.js"]
+COPY server.js  tracer.js monitoring.js /opt/server/
+
+CMD ["node", "-r", "./tracer.js", "server.js"]
 
