@@ -10,9 +10,6 @@ COPY package.json /opt/server/
 
 RUN npm install
 
-COPY server.js /opt/server/
-
-
 ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
 ENV OTEL_SERVICE_NAME=rs-cart
 
