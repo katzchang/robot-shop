@@ -1,18 +1,11 @@
+const api = require('@opentelemetry/api');
 const mongoClient = require('mongodb').MongoClient;
 const mongoObjectID = require('mongodb').ObjectID;
 const bodyParser = require('body-parser');
 const express = require('express');
-const pino = require('pino');
-const expPino = require('express-pino-logger');
-
-const logger = pino({
-    level: 'info',
-    prettyPrint: false,
-    useLevelLabels: true
-});
-const expLogger = expPino({
-    logger: logger
-});
+const logger = require('pino')()
+const pinoHttp = require('pino-http')()
+const { countAllRequests } = require("./monitoring");
 
 // MongoDB
 var db;
@@ -21,28 +14,54 @@ var mongoConnected = false;
 
 const app = express();
 
-app.use(expLogger);
+app.use(pinoHttp);
+
+app.use(countAllRequests());
 
 app.use((req, res, next) => {
     res.set('Timing-Allow-Origin', '*');
     res.set('Access-Control-Allow-Origin', '*');
+
+    next();
+});
+
+app.use((req, res, next) => {
+    let dcs = [
+        "asia-northeast2",
+        "asia-south1",
+        "europe-west3",
+        "us-east1",
+        "us-west1"
+    ];
+
+    const currentSpan = api.trace.getSpan(api.context.active());
+    currentSpan.setAttribute('custom.sdk.tags.datacenter', dcs[Math.floor(Math.random() * dcs.length)]);
+
     next();
 });
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/health', (req, res) => {
+app.get('/health-check', (req, res) => {
     var stat = {
         app: 'OK',
         mongo: mongoConnected
     };
+
+    const currentSpan = api.trace.getSpan(api.context.active());
+    currentSpan.setAttribute('http.request.header.x_instana_synthetic', 1);
+
+    if (!stat.mongo) {
+        return res.status(500).json(stat);
+    }
+
     res.json(stat);
 });
 
 // all products
 app.get('/products', (req, res) => {
-    if(mongoConnected) {
+    if (mongoConnected) {
         collection.find({}).toArray().then((products) => {
             res.json(products);
         }).catch((e) => {
@@ -57,21 +76,21 @@ app.get('/products', (req, res) => {
 
 // product by SKU
 app.get('/product/:sku', (req, res) => {
-    if(mongoConnected) {
+    if (mongoConnected) {
         // optionally slow this down
         const delay = process.env.GO_SLOW || 0;
         setTimeout(() => {
-        collection.findOne({sku: req.params.sku}).then((product) => {
-            req.log.info('product', product);
-            if(product) {
-                res.json(product);
-            } else {
-                res.status(404).send('SKU not found');
-            }
-        }).catch((e) => {
-            req.log.error('ERROR', e);
-            res.status(500).send(e);
-        });
+            collection.findOne({ sku: req.params.sku }).then((product) => {
+                req.log.info('product', product);
+                if (product) {
+                    res.json(product);
+                } else {
+                    res.status(404).send('SKU not found');
+                }
+            }).catch((e) => {
+                req.log.error('ERROR', e);
+                res.status(500).send(e);
+            });
         }, delay);
     } else {
         req.log.error('database not available');
@@ -81,9 +100,9 @@ app.get('/product/:sku', (req, res) => {
 
 // products in a category
 app.get('/products/:cat', (req, res) => {
-    if(mongoConnected) {
+    if (mongoConnected) {
         collection.find({ categories: req.params.cat }).sort({ name: 1 }).toArray().then((products) => {
-            if(products) {
+            if (products) {
                 res.json(products);
             } else {
                 res.status(404).send('No products for ' + req.params.cat);
@@ -100,7 +119,7 @@ app.get('/products/:cat', (req, res) => {
 
 // all categories
 app.get('/categories', (req, res) => {
-    if(mongoConnected) {
+    if (mongoConnected) {
         collection.distinct('categories').then((categories) => {
             res.json(categories);
         }).catch((e) => {
@@ -115,8 +134,8 @@ app.get('/categories', (req, res) => {
 
 // search name and description
 app.get('/search/:text', (req, res) => {
-    if(mongoConnected) {
-        collection.find({ '$text': { '$search': req.params.text }}).toArray().then((hits) => {
+    if (mongoConnected) {
+        collection.find({ '$text': { '$search': req.params.text } }).toArray().then((hits) => {
             res.json(hits);
         }).catch((e) => {
             req.log.error('ERROR', e);
@@ -133,7 +152,7 @@ function mongoConnect() {
     return new Promise((resolve, reject) => {
         var mongoURL = process.env.MONGO_URL || 'mongodb://mongodb:27017/catalogue';
         mongoClient.connect(mongoURL, (error, client) => {
-            if(error) {
+            if (error) {
                 reject(error);
             } else {
                 db = client.db('catalogue');
@@ -162,4 +181,3 @@ const port = process.env.CATALOGUE_SERVER_PORT || '8080';
 app.listen(port, () => {
     logger.info('Started on port', port);
 });
-
