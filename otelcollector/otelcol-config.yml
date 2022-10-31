@@ -68,7 +68,7 @@ service:
       processors: [memory_limiter, batch, resource/environment]
       exporters: [sapm, signalfx, logging]
     metrics:
-      receivers: [otlp, signalfx, smartagent/signalfx-forwarder, prometheus/internal, smartagent/rabbitmq]
+      receivers: [otlp, signalfx, smartagent/signalfx-forwarder, prometheus/internal, smartagent/rabbitmq, smartagent/nginx]
       processors: [memory_limiter, batch, resource/environment]
       exporters: [signalfx, logging]
     logs: 
