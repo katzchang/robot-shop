@@ -9,12 +9,7 @@
   "author": "SteveW",
   "license": "Apache-2.0",
   "dependencies": {
-    "@opentelemetry/api": "^1.1.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.33.1",
-    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.33.0",
-    "@opentelemetry/exporter-trace-otlp-grpc": "^0.33.0",
-    "@opentelemetry/sdk-metrics-base": "^0.31.0",
-    "@opentelemetry/sdk-node": "^0.33.0",
+    "@splunk/otel": "^2.0.0-rc1",
     "body-parser": "^1.18.1",
     "express": "^4.15.4",
     "express-pino-logger": "^7.0.0",

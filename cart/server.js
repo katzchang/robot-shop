@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const logger = require('pino')()
 const pinoHttp = require('pino-http')()
-const { countAllRequests } = require("./monitoring");
 
 // Prometheus
 const promClient = require('prom-client');
@@ -27,8 +26,6 @@ var catalogueHost = process.env.CATALOGUE_HOST || 'catalogue'
 const app = express();
 
 app.use(pinoHttp);
-
-app.use(countAllRequests())
 
 app.use((req, res, next) => {
     res.set('Timing-Allow-Origin', '*');
