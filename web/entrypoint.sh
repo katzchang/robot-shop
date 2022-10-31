@@ -31,9 +31,13 @@ chmod 644 $BASE_DIR/rum.html
 # apply environment variables to default.conf
 envsubst '${CATALOGUE_HOST} ${USER_HOST} ${CART_HOST} ${SHIPPING_HOST} ${PAYMENT_HOST} ${RATINGS_HOST}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf
 
-
-echo "load_module /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/ngx_http_opentelemetry_module.so;
-$(cat /etc/nginx/nginx.conf)" > /etc/nginx/nginx.conf
+echo "***"
+cat /etc/nginx/nginx.conf
+echo "***"
+ls -al /opt/opentelemetry-webserver-sdk/WebServerModule/Nginx/
+echo "***"
+cat /tmp/appd_install_*
+echo "***"
 
 exec nginx-debug -g "daemon off;"
 
