@@ -21,6 +21,16 @@ receivers:
           - source_labels: [ __name__ ]
             regex: '.*grpc_io.*'
             action: drop
+  smartagent/rabbitmq:
+    type: collectd/rabbitmq
+    host: rabbitmq
+    port: 15672
+    username: guest
+    password: guest
+  smartagent/nginx:
+    type: collectd/nginx
+    host: web
+    port: 8080
 
 processors:
   batch:
@@ -57,8 +67,8 @@ service:
       receivers: [otlp, smartagent/signalfx-forwarder]
       processors: [memory_limiter, batch, resource/environment]
       exporters: [sapm, signalfx, logging]
-    metrics/internal:
-      receivers: [otlp, signalfx, smartagent/signalfx-forwarder, prometheus/internal]
+    metrics:
+      receivers: [otlp, signalfx, smartagent/signalfx-forwarder, prometheus/internal, smartagent/rabbitmq]
       processors: [memory_limiter, batch, resource/environment]
       exporters: [signalfx, logging]
     logs: 
