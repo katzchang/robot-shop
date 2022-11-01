@@ -9,10 +9,9 @@ services:
     networks:
       - robot-shop
     logging: &logging
-      driver: "json-file"
+      driver: "fluentd"
       options:
-        max-size: "25m"
-        max-file: "2"
+        fluentd-address: "localhost:8006"
   otelcol:
     image: quay.io/signalfx/splunk-otel-collector
     command: [ "--config=/etc/otelcol-config.yml" ]
