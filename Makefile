@@ -35,7 +35,7 @@ push-all:
 
 
 docker-build:
-	docker build -t $(image-name) $(target)
+	docker build --build-arg VERSION=$(shell date +%s) -t $(image-name) $(target)
 	docker tag $(image-name):$(tag) $(repository):$(tag)
 
 docker-push: docker-build
