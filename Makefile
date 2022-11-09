@@ -33,16 +33,16 @@ push-all:
 	make docker-push image-name=rs-dispatch target=dispatch
 	make docker-push image-name=rs-web target=web
 
-
+service-version:=$(shell git log -1 --pretty=format:'%h')
 docker-build:
-	docker build --build-arg VERSION=$(shell date +%s) -t $(image-name) $(target)
+	docker build --build-arg VERSION=$(service-version) -t $(image-name) $(target)
 	docker tag $(image-name):$(tag) $(repository):$(tag)
 
 docker-push: docker-build
 	docker push $(repository):$(tag)
 
 $(patsubst %,build/%,$(targets)):
-	make docker-build image-name=rs-$(@F) target=$(@F)
+	make docker-build VERSION=$(service-version) image-name=rs-$(@F) target=$(@F)
 
 $(patsubst %,restart/%,$(targets)):
 	docker compose stop $(@F)
