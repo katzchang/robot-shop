@@ -3,3 +3,8 @@
 *-private.*
 vendor/
 Gopkg.lock
+
+node_modules
+package-lock.json
+
+splunk.env

@@ -1,6 +1,5 @@
 import random
 
-import instana
 import os
 import sys
 import time
@@ -17,6 +16,10 @@ from rabbitmq import Publisher
 # Prometheus
 import prometheus_client
 from prometheus_client import Counter, Histogram
+# Splunk APM
+import uwsgidecorators
+from splunk_otel.tracing import start_tracing
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
@@ -31,6 +34,11 @@ PromMetrics['SOLD_COUNTER'] = Counter('sold_count', 'Running count of items sold
 PromMetrics['AUS'] = Histogram('units_sold', 'Avergae Unit Sale', buckets=(1, 2, 5, 10, 100))
 PromMetrics['AVS'] = Histogram('cart_value', 'Avergae Value Sale', buckets=(100, 200, 500, 1000, 2000, 5000, 10000))
 
+@uwsgidecorators.postfork
+def setup_tracing():
+   start_tracing()
+   # Instrument the Flask app instance explicitly
+   FlaskInstrumentor().instrument_app(app)
 
 @app.errorhandler(Exception)
 def exception_handler(err):

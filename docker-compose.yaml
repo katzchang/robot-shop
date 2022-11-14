@@ -1,4 +1,6 @@
 version: '3'
+
+
 services:
   mongodb:
     build:
@@ -7,10 +9,20 @@ services:
     networks:
       - robot-shop
     logging: &logging
-      driver: "json-file"
+      driver: "fluentd"
       options:
-        max-size: "25m"
-        max-file: "2"
+        fluentd-address: "localhost:8006"
+  otelcol:
+    image: quay.io/signalfx/splunk-otel-collector
+    command: [ "--config=/etc/otelcol-config.yml" ]
+    volumes:
+      - ./otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
+    env_file:
+      - splunk.env
+    networks:
+      - robot-shop
+    logging:
+      <<: *logging
   redis:
     image: redis:6.2-alpine
     networks:
@@ -142,9 +154,6 @@ services:
   web:
     build:
       context: web
-      args:
-        # agent key to download tracing libs
-        KEY: ${INSTANA_AGENT_KEY}
     image: ${REPO}/rs-web:${TAG}
     depends_on:
       - catalogue
@@ -160,10 +169,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 3
-    # Uncomment to enable Instana EUM
-    # environment:
-      # INSTANA_EUM_KEY: <your eum key>
-      # INSTANA_EUM_REPORTING_URL: <your reporting url>
+    env_file:
+      - splunk.env
     logging:
       <<: *logging
 

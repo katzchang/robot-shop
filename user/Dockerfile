@@ -1,6 +1,5 @@
 FROM node:14
-
-ENV INSTANA_AUTO_PROFILE true
+ARG VERSION
 
 EXPOSE 8080
 
@@ -10,7 +9,17 @@ COPY package.json /opt/server/
 
 RUN npm install
 
+ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
+ENV OTEL_SERVICE_NAME=rs-user
+ENV OTEL_RESOURCE_ATTRIBUTES=service.version\=${VERSION}
+
+ENV SPLUNK_PROFILER_ENABLED='true'
+ENV SPLUNK_PROFILER_MEMORY_ENABLED='true'
+#ENV SPLUNK_PROFILER_LOGS_ENDPOINT=http://otelcol:4317
+
+ENV SPLUNK_METRICS_ENABLED='true'
+#ENV OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otelcol:4317
+
 COPY server.js /opt/server/
 
-CMD ["node", "server.js"]
-
+CMD ["node", "-r", "@splunk/otel/instrument", "server.js"]

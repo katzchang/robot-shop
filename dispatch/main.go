@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,11 +10,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/instana/go-sensor"
 	ot "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	otlog "github.com/opentracing/opentracing-go/log"
 	"github.com/streadway/amqp"
+
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
+	otelBridge "go.opentelemetry.io/otel/bridge/opentracing"
 )
 
 const (
@@ -164,15 +171,39 @@ func processSale(parentSpan ot.Span) {
 	time.Sleep(time.Duration(42+rand.Int63n(42)) * time.Millisecond)
 }
 
+func installExportPipeline(ctx context.Context) (func(context.Context) error, error) {
+	client := otlptracegrpc.NewClient()
+	exporter, err := otlptrace.New(ctx, client)
+	if err != nil {
+		return nil, fmt.Errorf("creating OTLP trace exporter: %w", err)
+	}
+
+	tracerProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+	)
+	otel.SetTracerProvider(tracerProvider)
+	
+	otelTracer := tracerProvider.Tracer(Service)
+	bridgeTracer, wrapperTracerProvider := otelBridge.NewTracerPair(otelTracer)
+	otel.SetTracerProvider(wrapperTracerProvider)
+	ot.SetGlobalTracer(bridgeTracer)
+
+	return tracerProvider.Shutdown, nil
+}
+
 func main() {
 	rand.Seed(time.Now().Unix())
-
-	// Instana tracing
-	ot.InitGlobalTracer(instana.NewTracerWithOptions(&instana.Options{
-		Service:           Service,
-		LogLevel:          instana.Info,
-		EnableAutoProfile: true,
-	}))
+	
+	ctx := context.Background()
+	shutdown, err := installExportPipeline(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := shutdown(ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	// Init amqpUri
 	// get host from environment
